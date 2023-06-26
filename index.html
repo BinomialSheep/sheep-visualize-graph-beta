@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  </head>
+  <body>
+    <div id="input_area">
+      <div>
+        <p>入力グラフ</p>
+        <textarea id="in_graph" name="example" cols="50" rows="10"></textarea>
+      </div>
+      <form name="format_form">
+        <p>入力形式</p>
+        <group class="inline-radio">
+          <div><input type="radio" name="direction" value="undirected" checked /><label>無向</label></div>
+          <div><input type="radio" name="direction" value="directed" /><label>有向</label></div>
+          <div><input type="radio" name="direction" value="opposite_directed" /><label>逆向</label></div>
+        </group>
+        <group class="inline-radio">
+          <div><input type="radio" name="graph_format" value="edge_list" checked /><label>辺配列</label></div>
+          <div><input type="radio" name="graph_format" value="transposed_edge_list" /><label>辺配列(T)</label></div>
+          <div><input type="radio" name="graph_format" value="adjancy_list" /><label>隣接リスト</label></div>
+          <div><input type="radio" name="graph_format" value="adjancy_matrix" /><label>隣接行列</label></div>
+        </group>
+        <group class="inline-radio">
+          <div><input type="radio" name="in_indexed" value="in_0_indexed" /><label>0-indexed</label></div>
+          <div><input type="radio" name="in_indexed" value="in_1_indexed" checked /><label>1-indexed</label></div>
+        </group>
+        <div id="out_format">
+          <p>出力形式</p>
+          <group class="inline-radio">
+            <div><input type="radio" name="out_indexed" value="out_0_indexed" /><label>0-indexed</label></div>
+            <div><input type="radio" name="out_indexed" value="out_1_indexed" checked /><label>1-indexed</label></div>
+          </group>
+        </div>
+      </form>
+      <button id="in_graph_button" onclick="generateGraph();">グラフ生成</button>
+    </div>
+    <div id="output_area">
+      <p>出力</p>
+      <div id="network"></div>
+    </div>
+    <script src="./js/script.js"></script>
+  </body>
+</html>
