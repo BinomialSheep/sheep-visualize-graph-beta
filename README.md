@@ -14,6 +14,10 @@
 
 AtCoder の入力形式を読み込んで、vis.js を用いて出力する
 
-## TODO：ここにライセンスなどを書く
+## contact
 
-This project is licensed under the MIT License, see the LICENSE.txt file for details.
+https://twitter.com/BinomialSheep
+
+## license
+
+This project is licensed under the MIT License, see the LICENSE file for details.
