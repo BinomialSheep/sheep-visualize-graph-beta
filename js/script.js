@@ -1,4 +1,4 @@
-const colorPallet = new Array('#b2cbe4', '#dfb7c8', '#decdb8', '#bcdacf');
+const colorPallet = new Array('#b2cbe4', '#e3b1ca', '#e3cab1', '#b1e3ca');
 
 const getNextColor = (nowColor) => {
   for (let i = 0; i < colorPallet.length; i++) {
