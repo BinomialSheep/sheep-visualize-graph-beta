@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="./css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   </head>
   <body>
@@ -20,10 +21,47 @@
           <div><input type="radio" name="direction" value="opposite_directed" /><label>逆向</label></div>
         </group>
         <group class="inline-radio">
-          <div><input type="radio" name="graph_format" value="edge_list" checked /><label>辺配列</label></div>
-          <div><input type="radio" name="graph_format" value="transposed_edge_list" /><label>辺配列(T)</label></div>
-          <div><input type="radio" name="graph_format" value="adjacency_list" /><label>隣接リスト</label></div>
-          <div><input type="radio" name="graph_format" value="adjacency_matrix" /><label>隣接行列</label></div>
+          <div>
+            <input
+              type="radio"
+              name="graph_format"
+              value="edge_list"
+              checked
+              data-bs-toggle="tooltip"
+              data-bs-html="true"
+              title="N (M)<br/>A<sub>1</sub> B<sub>1</sub> (C<sub>1</sub>)<br/>...<br/>A<sub>M</sub> B<sub>M</sub> (C<sub>M</sub>)<br/>M, C(重み)は省略可"
+            /><label>辺配列</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              name="graph_format"
+              value="transposed_edge_list"
+              data-bs-toggle="tooltip"
+              data-bs-html="true"
+              title="N (M)<br/>A<sub>1</sub> ...  A<sub>M</sub><br/>B<sub>1</sub> ...  B<sub>M</sub><br/>(C<sub>1</sub> ...  C<sub>M</sub>)<br/>M, C(重み)は省略可"
+            /><label>辺配列(T)</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              name="graph_format"
+              value="adjacency_list"
+              data-bs-toggle="tooltip"
+              data-bs-html="true"
+              title="N <br/>G<sub>11</sub> ...  G<sub>1i</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>Nj</sub>"
+            /><label>隣接リスト</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              name="graph_format"
+              value="adjacency_matrix"
+              data-bs-toggle="tooltip"
+              data-bs-html="true"
+              title="G<sub>11</sub> ...  G<sub>1N</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>NN</sub><br/>辺あり: 1, 辺なし: 0"
+            /><label>隣接行列</label>
+          </div>
         </group>
         <group class="inline-radio">
           <div><input type="radio" name="in_indexed" value="in_0_indexed" /><label>0-indexed</label></div>
@@ -37,7 +75,7 @@
           </group>
         </div>
       </form>
-      <button id="in_graph_button" onclick="generateGraph();">グラフ生成</button>
+      <button id="in_graph_button">グラフ生成</button>
     </div>
     <div id="output_area">
       <p>出力</p>

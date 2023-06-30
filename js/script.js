@@ -1,10 +1,44 @@
+const colorPallet = new Array('#b2cbe4', '#e3b1ca', '#e3cab1', '#b1e3ca');
+
+const getNextColor = (nowColor) => {
+  for (let i = 0; i < colorPallet.length; i++) {
+    if (nowColor == colorPallet[i]) return colorPallet[++i % colorPallet.length];
+  }
+  return colorPallet[0];
+};
+const getPrevColor = (nowColor) => {
+  for (let i = 0; i < colorPallet.length; i++) {
+    if (nowColor == colorPallet[i]) return colorPallet[(--i + colorPallet.length) % colorPallet.length];
+  }
+  return colorPallet[0];
+};
+
+const addEvents = (network, data) => {
+  // 頂点を左クリックで色の変更
+  network.on('click', (params) => {
+    if (params.nodes.length == 1) {
+      let id = params.nodes[0];
+      let nowColor = data.nodes.get(id).color;
+      data.nodes.update({ id: id, color: getNextColor(nowColor) });
+    }
+  });
+  // 頂点を右クリックで色の変更
+  network.on('oncontext', (params) => {
+    let id = network.getNodeAt(params.pointer.DOM); // NOTE 明示的に取得する必要がある
+    if (id !== undefined) {
+      let nowColor = data.nodes.get(id).color;
+      data.nodes.update({ id: id, color: getPrevColor(nowColor) });
+    }
+  });
+};
+
 const makeGraph = (graph, format, data, option) => {
   // 頂点
   let nodeList = new Array(graph.N);
   for (let i = 0; i < graph.N; i++) {
     // 出力のindexed調整
     let label = (format.out_indexed == 'out_1_indexed' ? i + 1 : i).toString();
-    nodeList[i] = { id: i, label: label };
+    nodeList[i] = { id: i, label: label, color: colorPallet[0] };
   }
   data.nodes = new vis.DataSet(nodeList);
 
@@ -15,6 +49,16 @@ const makeGraph = (graph, format, data, option) => {
     } else if (format.direction == 'opposite_directed') {
       graph.E[i].arrows = 'from';
     }
+  }
+  // 頂点をクリックした際に辺の色が変わらないよう設定
+  for (let i = 0; i < graph.M; i++) {
+    graph.E[i].color = {
+      color: 'blue',
+      highlight: 'blue',
+      hover: 'blue',
+      inherit: false,
+      opacity: 1.0,
+    };
   }
   data.edges = new vis.DataSet(graph.E);
 };
@@ -29,9 +73,7 @@ const edgeListToNormalizedGraph = (element) => {
   let E = new Array(M);
   for (let i = 0; i < M; i++) {
     let list = inList[i + 1].split(' ');
-    let A = list[0],
-      B = list[1];
-    E[i] = { from: A, to: B };
+    E[i] = { from: Number(list[0]), to: Number(list[1]) };
     // 重み付きの場合
     if (list.length >= 3) E[i].label = list[2];
   }
@@ -51,7 +93,7 @@ const transposedEdgeListToNormalizedGraph = (element) => {
   console.assert(Cs === undefined || Cs.length == As.length);
   let E = new Array(M);
   for (let i = 0; i < M; i++) {
-    E[i] = { from: As[i], to: Bs[i] };
+    E[i] = { from: Number(As[i]), to: Number(Bs[i]) };
     // 重み付きの場合
     if (Cs !== undefined) E[i].label = Cs[i];
   }
@@ -65,9 +107,8 @@ const adjacencyListToNormalizedGraph = (element) => {
   let N = line1[0]; // XXX：1行目は頂点数と仮定
   let E = new Array();
   for (let i = 1; i < inList.length; i++) {
-    let A = i;
     let line = inList[i].split(' ');
-    line.forEach((B) => E.push({ from: A, to: B }));
+    line.forEach((B) => E.push({ from: i, to: Number(B) }));
   }
   return { N: N, M: E.length, E: E };
 };
@@ -91,9 +132,10 @@ const adjacencyMatrixToNormalizedGraph = (element) => {
 const inputToNormalizedGraph = (format, element) => {
   let graph;
   if (format.graph_format == 'edge_list') graph = edgeListToNormalizedGraph(element);
-  if (format.graph_format == 'transposed_edge_list') graph = transposedEdgeListToNormalizedGraph(element);
-  if (format.graph_format == 'adjacency_list') graph = adjacencyListToNormalizedGraph(element);
-  if (format.graph_format == 'adjacency_matrix') graph = adjacencyMatrixToNormalizedGraph(element);
+  else if (format.graph_format == 'transposed_edge_list') graph = transposedEdgeListToNormalizedGraph(element);
+  else if (format.graph_format == 'adjacency_list') graph = adjacencyListToNormalizedGraph(element);
+  else if (format.graph_format == 'adjacency_matrix') graph = adjacencyMatrixToNormalizedGraph(element);
+  else console.assert(false);
 
   // 入力のindex調整
   if (format.in_indexed == 'in_1_indexed')
@@ -126,4 +168,19 @@ const generateGraph = () => {
   // ネットワークを描画
   let container = document.querySelector('#network');
   let network = new vis.Network(container, data, option);
+
+  // グラフのクリックイベントの付与
+  addEvents(network, data);
 };
+
+const initialize = (() => {
+  // ツールチップの初期化
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  const tooltipList = tooltipTriggerList.map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl));
+
+  // 出力キャンパス内では右クリックを禁止
+  document.querySelector('#network').oncontextmenu = () => false;
+
+  // ボタンのクリックイベントを付与
+  document.querySelector('#in_graph_button').onclick = () => generateGraph();
+})();
