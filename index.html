@@ -71,6 +71,16 @@
               title="G<sub>11</sub> ...  G<sub>1N</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>NN</sub><br/>辺あり: 1, 辺なし: 0"
             /><label>隣接行列</label>
           </div>
+          <div>
+            <input
+              type="radio"
+              name="graph_format"
+              value="parent_list"
+              data-bs-toggle="tooltip"
+              data-bs-html="true"
+              title="N <br/> A<sub>1</sub>...A<sub>N-1</sub> <br/> (C<sub>1</sub>...C<sub>N-1</sub>) <br/>C(重み)は省略可"
+            /><label>親頂点</label>
+          </div>
         </group>
         <group class="inline-radio">
           <div><input type="radio" name="in_indexed" value="in_0_indexed" /><label>0-indexed</label></div>

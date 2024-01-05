@@ -113,6 +113,39 @@ const adjacencyMatrixToNormalizedGraph = (element) => {
   }
   return { N: N, M: E.length, E: E };
 };
+// 親頂点配列表現を正規化
+const parentListToNormalizedGraph = (element) => {
+  let inList = element.value.split('\n');
+  let line1 = inList[0].split(' ');
+  let Ps = inList[1].split(' ');
+  let Cs = inList[2]?.split(' ');
+
+  let N = Number(line1[0]);
+  let M = N - 1;
+  let E = new Array();
+
+  if (Ps.length === N - 1) {
+    // 頂点1が根固定のパターン
+    for (let i = 0; i < Ps.length; i++) {
+      E.push({ from: Number(Ps[i]), to: i + 2 });
+      // 重み付きの場合
+      if (Cs !== undefined) E[i].label = Cs[i];
+    }
+  } else if (Ps.length === N) {
+    // 特殊な入力が根のパターン（-1 or 自分自身を指していたら根）
+    for (let i = 0; i < Ps.length; i++) {
+      if (Ps[i] == -1) continue;
+      if (Ps[i] == i + 1 && format.in_indexed == 'in_1_indexed') continue;
+      if (Ps[i] == i && format.in_indexed == 'in_0_indexed') continue;
+      E.push({ from: Number(Ps[i]), to: i + 1 });
+      // 重み付きの場合
+      if (Cs !== undefined) E[i].label = Cs[i];
+    }
+  } else {
+    console.log('unreachable');
+  }
+  return { N: N, M: M, E: E };
+};
 
 const inputToNormalizedGraph = (format, element) => {
   let graph;
@@ -120,6 +153,7 @@ const inputToNormalizedGraph = (format, element) => {
   else if (format.graph_format == 'transposed_edge_list') graph = transposedEdgeListToNormalizedGraph(element);
   else if (format.graph_format == 'adjacency_list') graph = adjacencyListToNormalizedGraph(element);
   else if (format.graph_format == 'adjacency_matrix') graph = adjacencyMatrixToNormalizedGraph(element);
+  else if (format.graph_format == 'parent_list') graph = parentListToNormalizedGraph(element);
   else console.assert(false);
 
   // 入力のindex調整
@@ -144,7 +178,7 @@ const generateGraph = () => {
 
   // 入力をパースしてグラフの内部表現を統一
   let graph = inputToNormalizedGraph(format, element);
-
+  
   // 描画用のグラフを生成
   let data = {};
   let option = {};
