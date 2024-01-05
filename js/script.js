@@ -1,43 +1,81 @@
-const addEvents = (network, data) => {
-  // 頂点を左クリックで色の変更
-  network.on('click', (params) => {
-    if (params.nodes.length == 1) {
-      let id = params.nodes[0];
-      let nowColor = data.nodes.get(id).color;
-      data.nodes.update({ id: id, color: getNextColor(nowColor) });
-    }
-  });
-  // 頂点を右クリックで色の変更
-  network.on('oncontext', (params) => {
-    let id = network.getNodeAt(params.pointer.DOM); // NOTE 明示的に取得する必要がある
-    if (id !== undefined) {
-      let nowColor = data.nodes.get(id).color;
-      data.nodes.update({ id: id, color: getPrevColor(nowColor) });
-    }
-  });
+const addEvents = () => {
+  if (this.network == undefined) return;
+
+  this.network.off('click');
+  this.network.off('oncontext');
+
+  if (this.click_kind == 'color') {
+    // 頂点を左クリックで色の変更
+    this.network.on('click', (params) => {
+      if (params.nodes.length == 1) {
+        let id = params.nodes[0];
+        let nowColor = this.data.nodes.get(id).color;
+        this.data.nodes.update({ id: id, color: getNextColor(nowColor) });
+      }
+    });
+    // 頂点を右クリックで色の変更
+    this.network.on('oncontext', (params) => {
+      let id = this.network.getNodeAt(params.pointer.DOM); // NOTE 明示的に取得する必要がある
+      if (id !== undefined) {
+        let nowColor = this.data.nodes.get(id).color;
+        this.data.nodes.update({ id: id, color: getPrevColor(nowColor) });
+      }
+    });
+  } else if (this.click_kind == 'depth') {
+    // 頂点を左クリックでその頂点を深さ0としてDFS
+    this.network.on('click', (params) => {
+      if (params.nodes.length == 1) {
+        let startId = params.nodes[0];
+
+        // console.log(this.graph.levelList);
+        makeTree(startId);
+        // console.log(this.graph.levelList);
+        // for (let i = 0; i < this.graph.N; i++) {
+        //   let level = this.graph.levelList?.[i];
+        //   this.data.nodes.update({ id: i, level: level });
+        // }
+        makeGraph();
+
+        // ネットワークを描画
+        this.network = new vis.Network(container, this.data, this.option);
+        addEvents();
+      }
+    });
+  }
 };
 
-const makeGraph = (graph, format, data, option) => {
+const makeGraph = () => {
   // 頂点
-  let nodeList = new Array(graph.N);
-  for (let i = 0; i < graph.N; i++) {
+  let nodeList = new Array(this.graph.N);
+  for (let i = 0; i < this.graph.N; i++) {
     // 出力のindexed調整
-    let label = (format.out_indexed == 'out_1_indexed' ? i + 1 : i).toString();
-    nodeList[i] = { id: i, label: label, color: colorPallet[0] };
+    let label = (this.format.out_indexed == 'out_1_indexed' ? i + 1 : i).toString();
+    // 出力の配置
+    let level = this.graph.levelList?.[i];
+    // 色
+    let color = this.data.nodes?.get(i).color;
+    if (color == undefined) color = colorPallet[0];
+
+    nodeList[i] = {
+      id: i,
+      label: label,
+      level: level,
+      color: color,
+    };
   }
-  data.nodes = new vis.DataSet(nodeList);
+  this.data.nodes = new vis.DataSet(nodeList);
 
   // 辺
-  for (let i = 0; i < graph.M; i++) {
-    if (format.direction == 'directed') {
-      graph.E[i].arrows = 'to';
-    } else if (format.direction == 'opposite_directed') {
-      graph.E[i].arrows = 'from';
+  for (let i = 0; i < this.graph.M; i++) {
+    if (this.format.direction == 'directed') {
+      this.graph.E[i].arrows = 'to';
+    } else if (this.format.direction == 'opposite_directed') {
+      this.graph.E[i].arrows = 'from';
     }
   }
   // 頂点をクリックした際に辺の色が変わらないよう設定
-  for (let i = 0; i < graph.M; i++) {
-    graph.E[i].color = {
+  for (let i = 0; i < this.graph.M; i++) {
+    this.graph.E[i].color = {
       color: 'blue',
       highlight: 'blue',
       hover: 'blue',
@@ -45,129 +83,46 @@ const makeGraph = (graph, format, data, option) => {
       opacity: 1.0,
     };
   }
-  data.edges = new vis.DataSet(graph.E);
+  this.data.edges = new vis.DataSet(this.graph.E);
 };
 
-// 辺配列表現を正規化
-const edgeListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
-  let line1 = inList[0].split(' ');
-  let N = line1[0];
-  let M = inList.length - 1;
-  console.assert(line1[1] === undefined || line1[1] == M);
-  let E = new Array(M);
-  for (let i = 0; i < M; i++) {
-    let list = inList[i + 1].split(' ');
-    E[i] = { from: Number(list[0]), to: Number(list[1]) };
-    // 重み付きの場合
-    if (list.length >= 3) E[i].label = list[2];
-  }
-  return { N: N, M: M, E: E };
-};
-// 辺配列（転置）表現を正規化
-const transposedEdgeListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
-  let line1 = inList[0].split(' ');
-  let As = inList[1].split(' ');
-  let Bs = inList[2].split(' ');
-  let Cs = inList[3]?.split(' ');
-  let N = line1[0];
-  let M = As.length;
-  console.assert(Bs.length == As.length);
-  console.assert(line1[1] === undefined || line1[1] == As.length);
-  console.assert(Cs === undefined || Cs.length == As.length);
-  let E = new Array(M);
-  for (let i = 0; i < M; i++) {
-    E[i] = { from: Number(As[i]), to: Number(Bs[i]) };
-    // 重み付きの場合
-    if (Cs !== undefined) E[i].label = Cs[i];
-  }
-  return { N: N, M: M, E: E };
-};
-
-// 隣接リスト表現を正規化
-const adjacencyListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
-  let line1 = inList[0].split(' ');
-  let N = line1[0]; // XXX：1行目は頂点数と仮定
-  let E = new Array();
-  for (let i = 1; i < inList.length; i++) {
-    let line = inList[i].split(' ');
-    line.forEach((B) => E.push({ from: i, to: Number(B) }));
-  }
-  return { N: N, M: E.length, E: E };
-};
-// 隣接行列表現を正規化
-const adjacencyMatrixToNormalizedGraph = (element) => {
-  // XXX: 1が辺ありとみなす
-  let inList = element.value.split('\n').filter((v) => v); // NOTE：空行削除
-  let N = inList.length;
-  let E = new Array();
-  for (let i = 0; i < inList.length; i++) {
-    let line = inList[i].split(' ');
-    for (let j = 0; j < line.length; j++) {
-      if (line[j] == 1) {
-        E.push({ from: i + 1, to: j + 1 });
-      }
+const makeTree = (start) => {
+  let queue = new myQueue();
+  let levelList = new Array(this.graph.N);
+  levelList[start] = 0;
+  queue.push(start);
+  for (let i = 0; ; i++) {
+    while (!queue.empty()) {
+      const v = queue.front();
+      queue.pop();
+      this.graph.adjacencyList[v].forEach((u) => {
+        if (levelList[u] == undefined) {
+          levelList[u] = levelList[v] + 1;
+          queue.push(u);
+        }
+      });
+    }
+    if (i == this.graph.N) break;
+    if (levelList[i] == undefined) {
+      levelList[i] = 0;
+      queue.push(i);
     }
   }
-  return { N: N, M: E.length, E: E };
-};
-// 親頂点配列表現を正規化
-const parentListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
-  let line1 = inList[0].split(' ');
-  let Ps = inList[1].split(' ');
-  let Cs = inList[2]?.split(' ');
 
-  let N = Number(line1[0]);
-  let M = N - 1;
-  let E = new Array();
-
-  if (Ps.length === N - 1) {
-    // 頂点1が根固定のパターン
-    for (let i = 0; i < Ps.length; i++) {
-      E.push({ from: Number(Ps[i]), to: i + 2 });
-      // 重み付きの場合
-      if (Cs !== undefined) E[i].label = Cs[i];
-    }
-  } else if (Ps.length === N) {
-    // 特殊な入力が根のパターン（-1 or 自分自身を指していたら根）
-    for (let i = 0; i < Ps.length; i++) {
-      if (Ps[i] == -1) continue;
-      if (Ps[i] == i + 1 && format.in_indexed == 'in_1_indexed') continue;
-      if (Ps[i] == i && format.in_indexed == 'in_0_indexed') continue;
-      E.push({ from: Number(Ps[i]), to: i + 1 });
-      // 重み付きの場合
-      if (Cs !== undefined) E[i].label = Cs[i];
-    }
-  } else {
-    console.log('unreachable');
-  }
-  return { N: N, M: M, E: E };
-};
-
-const inputToNormalizedGraph = (format, element) => {
-  let graph;
-  if (format.graph_format == 'edge_list') graph = edgeListToNormalizedGraph(element);
-  else if (format.graph_format == 'transposed_edge_list') graph = transposedEdgeListToNormalizedGraph(element);
-  else if (format.graph_format == 'adjacency_list') graph = adjacencyListToNormalizedGraph(element);
-  else if (format.graph_format == 'adjacency_matrix') graph = adjacencyMatrixToNormalizedGraph(element);
-  else if (format.graph_format == 'parent_list') graph = parentListToNormalizedGraph(element);
-  else console.assert(false);
-
-  // 入力のindex調整
-  if (format.in_indexed == 'in_1_indexed')
-    graph.E.forEach((e) => {
-      e.from--, e.to--;
-    });
-
-  return graph;
+  this.graph.levelList = levelList;
+  // オプション
+  this.option.layout = {
+    hierarchical: {
+      enabled: true,
+      direction: 'LR',
+      sortMethod: 'directed',
+    },
+  };
 };
 
 const generateGraph = () => {
   // 入出力形式を取得
-  let format = {
+  this.format = {
     direction: document.querySelector('input:checked[name*=direction]').value,
     graph_format: document.querySelector('input:checked[name*=graph_format]').value,
     in_indexed: document.querySelector('input:checked[name*=in_indexed]').value,
@@ -177,19 +132,28 @@ const generateGraph = () => {
   let element = document.querySelector('#in_graph');
 
   // 入力をパースしてグラフの内部表現を統一
-  let graph = inputToNormalizedGraph(format, element);
-  
+  this.graph = inputToNormalizedGraph(this.format, element);
+  this.graph.levelList = new Array(this.graph.N);
+  for (let i = 0; i < this.graph.N; i++) this.graph.levelList[i] = 0;
+
+  // vis.js用の変数
+  this.data = {};
+  this.option = {};
+  //
+  this.click_kind = document.querySelector('input:checked[name*=click_kind]').value;
+  if (this.click_kind == 'depth') {
+    makeTree(0);
+  }
+
   // 描画用のグラフを生成
-  let data = {};
-  let option = {};
-  makeGraph(graph, format, data, option);
+  makeGraph();
 
   // ネットワークを描画
-  let container = document.querySelector('#network');
-  let network = new vis.Network(container, data, option);
+  this.container = document.querySelector('#network');
+  this.network = new vis.Network(container, this.data, this.option);
 
   // グラフのクリックイベントの付与
-  addEvents(network, data);
+  addEvents();
 };
 
 const initialize = (() => {
@@ -200,6 +164,19 @@ const initialize = (() => {
   // 出力キャンパス内では右クリックを禁止
   document.querySelector('#network').oncontextmenu = () => false;
 
+  //
+  this.network = undefined;
+  this.data = undefined;
+  this.option = undefined;
+
   // ボタンのクリックイベントを付与
   document.querySelector('#in_graph_button').onclick = () => generateGraph();
+  document.querySelector('#click_color').onclick = () => {
+    this.click_kind = document.querySelector('input:checked[name*=click_kind]').value;
+    addEvents();
+  };
+  document.querySelector('#click_depth').onclick = () => {
+    this.click_kind = document.querySelector('input:checked[name*=click_kind]').value;
+    addEvents();
+  };
 })();

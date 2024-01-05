@@ -17,92 +17,112 @@
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   </head>
   <body>
-    <div id="input_area">
-      <div>
-        <p>入力グラフ</p>
-        <textarea id="in_graph" name="example" cols="50" rows="10"></textarea>
-      </div>
-      <form name="format_form">
-        <p>入力形式</p>
-        <group class="inline-radio">
-          <div><input type="radio" name="direction" value="undirected" checked /><label>無向</label></div>
-          <div><input type="radio" name="direction" value="directed" /><label>有向</label></div>
-          <div><input type="radio" name="direction" value="opposite_directed" /><label>逆向</label></div>
-        </group>
-        <group class="inline-radio">
-          <div>
-            <input
-              type="radio"
-              name="graph_format"
-              value="edge_list"
-              checked
-              data-bs-toggle="tooltip"
-              data-bs-html="true"
-              title="N (M)<br/>A<sub>1</sub> B<sub>1</sub> (C<sub>1</sub>)<br/>...<br/>A<sub>M</sub> B<sub>M</sub> (C<sub>M</sub>)<br/>M, C(重み)は省略可"
-            /><label>辺配列</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="graph_format"
-              value="transposed_edge_list"
-              data-bs-toggle="tooltip"
-              data-bs-html="true"
-              title="N (M)<br/>A<sub>1</sub> ...  A<sub>M</sub><br/>B<sub>1</sub> ...  B<sub>M</sub><br/>(C<sub>1</sub> ...  C<sub>M</sub>)<br/>M, C(重み)は省略可"
-            /><label>辺配列(T)</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="graph_format"
-              value="adjacency_list"
-              data-bs-toggle="tooltip"
-              data-bs-html="true"
-              title="N <br/>G<sub>11</sub> ...  G<sub>1i</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>Nj</sub>"
-            /><label>隣接リスト</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="graph_format"
-              value="adjacency_matrix"
-              data-bs-toggle="tooltip"
-              data-bs-html="true"
-              title="G<sub>11</sub> ...  G<sub>1N</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>NN</sub><br/>辺あり: 1, 辺なし: 0"
-            /><label>隣接行列</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="graph_format"
-              value="parent_list"
-              data-bs-toggle="tooltip"
-              data-bs-html="true"
-              title="N <br/> A<sub>1</sub>...A<sub>N-1</sub> <br/> (C<sub>1</sub>...C<sub>N-1</sub>) <br/>C(重み)は省略可"
-            /><label>親頂点</label>
-          </div>
-        </group>
-        <group class="inline-radio">
-          <div><input type="radio" name="in_indexed" value="in_0_indexed" /><label>0-indexed</label></div>
-          <div><input type="radio" name="in_indexed" value="in_1_indexed" checked /><label>1-indexed</label></div>
-        </group>
-        <div id="out_format">
-          <p>出力形式</p>
-          <group class="inline-radio">
-            <div><input type="radio" name="out_indexed" value="out_0_indexed" /><label>0-indexed</label></div>
-            <div><input type="radio" name="out_indexed" value="out_1_indexed" checked /><label>1-indexed</label></div>
-          </group>
+    <header>
+      <h1>タイトル</h1>
+    </header>
+    <div class="content">
+      <div id="input_area">
+        <div>
+          <p>入力グラフ</p>
+          <textarea id="in_graph" name="example" cols="50" rows="10"></textarea>
         </div>
-      </form>
-      <button id="in_graph_button">グラフ生成</button>
+        <form name="format_form">
+          <p>入力形式</p>
+          <group class="inline-radio">
+            <div><input type="radio" name="direction" value="undirected" checked /><label>無向</label></div>
+            <div><input type="radio" name="direction" value="directed" /><label>有向</label></div>
+            <div><input type="radio" name="direction" value="opposite_directed" /><label>逆向</label></div>
+          </group>
+          <group class="inline-radio">
+            <div>
+              <input
+                type="radio"
+                name="graph_format"
+                value="edge_list"
+                checked
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="N (M)<br/>A<sub>1</sub> B<sub>1</sub> (C<sub>1</sub>)<br/>...<br/>A<sub>M</sub> B<sub>M</sub> (C<sub>M</sub>)<br/>M, C(重み)は省略可"
+              /><label>辺配列</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="graph_format"
+                value="transposed_edge_list"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="N (M)<br/>A<sub>1</sub> ...  A<sub>M</sub><br/>B<sub>1</sub> ...  B<sub>M</sub><br/>(C<sub>1</sub> ...  C<sub>M</sub>)<br/>M, C(重み)は省略可"
+              /><label>辺配列(T)</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="graph_format"
+                value="adjacency_list"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="N <br/>G<sub>11</sub> ...  G<sub>1i</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>Nj</sub>"
+              /><label>隣接リスト</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="graph_format"
+                value="adjacency_matrix"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="G<sub>11</sub> ...  G<sub>1N</sub><br/>...<br/>G<sub>N1</sub> ...  G<sub>NN</sub><br/>辺あり: 1, 辺なし: 0"
+              /><label>隣接行列</label>
+            </div>
+            <div>
+              <input
+                type="radio"
+                name="graph_format"
+                value="parent_list"
+                data-bs-toggle="tooltip"
+                data-bs-html="true"
+                title="N <br/> A<sub>1</sub>...A<sub>N-1</sub> <br/> (C<sub>1</sub>...C<sub>N-1</sub>) <br/>C(重み)は省略可"
+              /><label>親頂点</label>
+            </div>
+          </group>
+          <group class="inline-radio">
+            <div><input type="radio" name="in_indexed" value="in_0_indexed" /><label>0-indexed</label></div>
+            <div><input type="radio" name="in_indexed" value="in_1_indexed" checked /><label>1-indexed</label></div>
+          </group>
+          <div id="out_format">
+            <p>出力形式</p>
+            <group class="inline-radio">
+              <div><input type="radio" name="out_indexed" value="out_0_indexed" /><label>0-indexed</label></div>
+              <div><input type="radio" name="out_indexed" value="out_1_indexed" checked /><label>1-indexed</label></div>
+            </group>
+          </div>
+        </form>
+        <button id="in_graph_button">グラフ生成</button>
+      </div>
     </div>
-    <div id="output_area">
-      <p>出力</p>
-      <div id="network"></div>
+    <div class="right_area">
+      <div id="output_area">
+        <p>出力</p>
+        <div id="network"></div>
+      </div>
+
+      <div id="intaractive_area">
+        <form name="interactive_form" id="interactive">
+          <div id="in_format">
+            <p>クリックイベント</p>
+            <group class="inline-radio">
+              <div><input type="radio" name="click_kind" value="color" id="click_color" checked /><label>色の変更</label></div>
+              <div><input type="radio" name="click_kind" value="depth" id="click_depth" /><label>選択頂点から深さで描画</label></div>
+            </group>
+          </div>
+        </form>
+      </div>
     </div>
     <a href="https://github.com/BinomialSheep/sheep-visualize-graph-beta/">Github repository</a>
     <script src="./js/color.js"></script>
     <script src="./js/myQueue.js"></script>
+    <script src="./js/normalizeGraph.js"></script>
     <script src="./js/script.js"></script>
   </body>
 </html>
