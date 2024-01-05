@@ -22,18 +22,12 @@ const addEvents = () => {
       }
     });
   } else if (this.click_kind == 'depth') {
-    // 頂点を左クリックでその頂点を深さ0としてDFS
+    // 頂点を左クリックでその頂点を深さ0としてBFS
     this.network.on('click', (params) => {
       if (params.nodes.length == 1) {
         let startId = params.nodes[0];
 
-        // console.log(this.graph.levelList);
         makeTree(startId);
-        // console.log(this.graph.levelList);
-        // for (let i = 0; i < this.graph.N; i++) {
-        //   let level = this.graph.levelList?.[i];
-        //   this.data.nodes.update({ id: i, level: level });
-        // }
         makeGraph();
 
         // ネットワークを描画
