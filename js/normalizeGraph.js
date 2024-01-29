@@ -1,6 +1,6 @@
 // 辺配列表現を正規化
 const edgeListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
+  let inList = element.value.split('\n').filter((v) => v || v === '0');
   let line1 = inList[0].split(' ');
   let N = Number(line1[0]);
   let M = inList.length - 1;
@@ -16,7 +16,7 @@ const edgeListToNormalizedGraph = (element) => {
 };
 // 辺配列（転置）表現を正規化
 const transposedEdgeListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
+  let inList = element.value.split('\n').filter((v) => v || v === '0');
   let line1 = inList[0].split(' ');
   let As = inList[1].split(' ');
   let Bs = inList[2].split(' ');
@@ -37,7 +37,7 @@ const transposedEdgeListToNormalizedGraph = (element) => {
 
 // 隣接リスト表現を正規化
 const adjacencyListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
+  let inList = element.value.split('\n').filter((v) => v || v === '0');
   let line1 = inList[0].split(' ');
   let N = Number(line1[0]); // XXX：1行目は頂点数と仮定
   let E = new Array();
@@ -50,7 +50,7 @@ const adjacencyListToNormalizedGraph = (element) => {
 // 隣接行列表現を正規化
 const adjacencyMatrixToNormalizedGraph = (element) => {
   // XXX: 1が辺ありとみなす
-  let inList = element.value.split('\n').filter((v) => v); // NOTE：空行削除
+  let inList = element.value.split('\n').filter((v) => v || v === '0');
   let N = Number(inList.length);
   let E = new Array();
   for (let i = 0; i < inList.length; i++) {
@@ -65,7 +65,7 @@ const adjacencyMatrixToNormalizedGraph = (element) => {
 };
 // 親頂点配列表現を正規化
 const parentListToNormalizedGraph = (element) => {
-  let inList = element.value.split('\n');
+  let inList = element.value.split('\n').filter((v) => v || v === '0');
   let line1 = inList[0].split(' ');
   let Ps = inList[1].split(' ');
   let Cs = inList[2]?.split(' ');
