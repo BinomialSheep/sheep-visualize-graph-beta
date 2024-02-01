@@ -150,6 +150,7 @@ const generateGraph = () => {
   addEvents();
 };
 
+
 const initialize = (() => {
   // ツールチップの初期化
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -173,4 +174,7 @@ const initialize = (() => {
     this.click_kind = document.querySelector('input:checked[name*=click_kind]').value;
     addEvents();
   };
+
+  // 入力グラフのプレイスホルダーを設定
+  this.placeHolder = new PlaceHolder();
 })();
